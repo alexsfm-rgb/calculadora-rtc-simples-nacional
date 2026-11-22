@@ -2,16 +2,15 @@
 # Arquivo adicionado pela CBrasil; não existe no repositório da Receita, então o "Sync fork" não gera conflito.
 # O banco é gerado com a pasta flyway/ do repositório do regime regular, como manda o README oficial.
 
-FROM eclipse-temurin:25-jdk AS build
+FROM maven:3.9-eclipse-temurin-25 AS build
 RUN apt-get update && apt-get install -y --no-install-recommends git && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 COPY . .
 RUN git clone --depth 1 https://github.com/ReceitaFederal/calculadora-rtc-regime-regular.git /tmp/regular \
  && cp -r /tmp/regular/flyway ./flyway \
- && chmod +x mvnw \
  && mkdir -p calculadora/db \
- && ./mvnw -q flyway:migrate -Dflyway.configFiles=./flyway/flyway-pro.conf --batch-mode --errors \
- && ./mvnw -q clean package -DskipTests --batch-mode
+ && mvn -q flyway:migrate -Dflyway.configFiles=./flyway/flyway-pro.conf --batch-mode --errors \
+ && mvn -q clean package -DskipTests --batch-mode
 
 FROM eclipse-temurin:25-jre
 WORKDIR /app
